@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>GSI INVENTORY MANAGEMENT</title>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+<body>
+	<h1>GSI INVENTORY MANAGEMENT</h1>
+
+
+	<div style="padding: 20px">
+        <a class="waves-effect waves-light btn-large" id="action-btn-person"><i class="material-icons left">list</i>Show List of Persons</a>
+        <input type="text" id="searchPerson" onkeyup="searchPerson()" placeholder="Search for Person.." title="Type in a category" style="width: 35%; position: relative; left: 60px;">
+        <a class="btn-floating btn-medium waves-effect waves-light green" onclick="exportTableToExcel('table-person', 'data')" style="position: relative; left: 80px;"><i class="material-icons">description</i></a>
+    <table id="table-person" class="highlight" style="width: 50%;">
+        <thead></thead>
+        <tfoot></tfoot>
+        <tbody></tbody>
+    </table>
+
+    </div>
+
+    <div style="padding: 20px;">
+        <a class="waves-effect waves-light btn-large" id="action-btn-machine"><i class="material-icons left">list</i>Show List of Machines</a>
+        <input type="text" id="searchMachine" onkeyup="searchMachine()" placeholder="Search for Machine.." title="Type in a category" style="width: 35%; position: relative; left: 50px;">
+        <a class="btn-floating btn-medium waves-effect waves-light green" onclick="exportTableToExcel('table-machine', 'data')" style="position: relative; left: 70px;"><i class="material-icons">description</i></a>
+    <table id="table-machine" class="highlight">
+        <thead></thead>
+        <tfoot></tfoot>
+        <tbody></tbody>
+    </table>
+    </div>
+
+    <div style="padding: 20px;">
+        <a class="waves-effect waves-light btn-large" id="action-btn-assign"><i class="material-icons left">list</i>Show Assigned Machines</a>
+        <input type="text" id="searchAssign" onkeyup="searchAssign()" placeholder="Search for Person.." title="Type in a category" style="width: 35%; position: relative; left: 30px;">
+        <a class="btn-floating btn-medium waves-effect waves-light green" onclick="exportTableToExcel('table-assign', 'data')" style="position: relative; left: 50px;"><i class="material-icons">description</i></a>
+    <table id="table-assign" class="highlight">
+        <thead></thead>
+        <tfoot></tfoot>
+        <tbody></tbody>
+    </table>
+
+    <!--<button onclick="exportTableToExcel('table-assign', 'members-data')">Export Table Data To Excel File</button>-->
+    </div>
+
+
+</body>
+<script>
+    var mysql = require('mysql');
+
+    function el(selector) {
+        return document.getElementById(selector);
+    }
+
+    el('action-btn-person').addEventListener('click', function () {
+        // Get the mysql service
+        getPersons(function (rows) {
+            var html = '';
+
+            rows.forEach(function (row) {
+                html += '<tr>';
+                html += '<td>';
+                html += row.Personid;
+                html += '</td>';
+                html += '<td>';
+                html += row.Name;
+                html += '</td>';
+                html += '<td>';
+                html += "<button class='btn' id='delete-record' onclick='deletePerson(\"" + row.Name + "\")'><i class='fa fa-trash'></i></button>";
+                html += '</td>';
+                html += '</tr>';
+                console.log(row);
+            });
+
+            document.querySelector('#table-person > tbody').innerHTML = html;
+            document.querySelector('#table-person > thead').innerHTML = '<tr><th scope="col">Person ID</th> <th scope="col">Name</th> <th scope="col"></th></tr>';
+
+        });
+    }, false);
+
+    function getPersons(callback) {
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+        });
+
+        // Perform a query
+        $query = 'SELECT Personid, Name FROM person ORDER BY Name ASC';
+
+        connection.query($query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            callback(rows);
+
+            console.log("Query succesfully executed");
+        });
+
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        });
+    }
+
+
+        el('action-btn-machine').addEventListener('click', function () {
+        // Get the mysql service
+        getMachines(function (rows) {
+            var html = '';
+
+            rows.forEach(function (row) {
+                html += '<tr>';
+                html += '<td>';
+                html += row.Machineid;
+                html += '</td>';
+                html += '<td>';
+                html += row.Machinetype;
+                html += '</td>';
+                html += '<td>';
+                html += row.MachineNumber;
+                html += '</td>';
+                html += '<td>';
+                html += "<button class='btn' id='delete-record' onclick='deleteMachine(\"" + row.Machinetype + "\",\"" + row.MachineNumber + "\")'><i class='fa fa-trash'></i></button>";
+                html += '</td>';
+                html += '</tr>';
+                console.log(row);
+            });
+
+            document.querySelector('#table-machine > tbody').innerHTML = html;
+            document.querySelector('#table-machine > thead').innerHTML = '<tr><th scope="col">Machine ID</th> <th scope="col">Machine Type</th> <th scope="col">Machine Number</th> </tr>';
+
+        });
+    }, false);
+
+    function getMachines(callback) {
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+        });
+
+        // Perform a query
+        $query = 'SELECT Machineid, Machinetype, MachineNumber FROM machine ORDER BY Machinetype ASC';
+
+        connection.query($query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            callback(rows);
+
+            console.log("Query succesfully executed");
+        });
+
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        });
+    }
+
+
+    el('action-btn-assign').addEventListener('click', function () {
+        // Get the mysql service
+        getAssigned(function (rows) {
+            var html = '';
+
+            rows.forEach(function (row) {
+                html += '<tr>';
+                html += '<td>';
+                html += row.rowid;
+                html += '</td>';
+                html += '<td>';
+                html += row.Person;
+                html += '</td>';
+                html += '<td>';
+                html += row.Machinetype;
+                html += '</td>';
+                html += '<td>';
+                html += row.Machinenumber;
+                html += '</td>';
+                html += '<td>';
+                html += "<button class='btn' id='delete-record' onclick='deleteAssign(\"" + row.Person + "\",\"" + row.Machinetype + "\",\"" + row.Machinenumber + "\")'><i class='fa fa-trash'></i></button>";
+                html += '</td>';
+                html += '</tr>';
+                console.log(row);
+            });
+
+            document.querySelector('#table-assign > tbody').innerHTML = html;
+            document.querySelector('#table-assign > thead').innerHTML = '<tr><th scope="col">RowID</th> <th scope="col">Person</th> <th scope="col">Machine Type</th> <th scope="col">Machine Number</th> </tr>';
+
+        });
+    }, false);
+
+    function getAssigned(callback) {
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+        });
+
+        // Perform a query
+        $query = 'SELECT * FROM assign ORDER BY Person ASC';
+
+        connection.query($query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            callback(rows);
+
+            console.log("Query succesfully executed");
+        });
+
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        });
+    }
+
+
+    function deletePerson(name){
+
+        var mysql = require('mysql');
+        var config = require("./db-config");
+        //var maxID;
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+        });
+
+        $delete_query = 'DELETE FROM person WHERE Name="' + name + '";';
+
+
+        connection.query($delete_query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            console.log("Query succesfully executed");
+        });
+
+        $max_id = 'SELECT MAX(Personid) AS maxid FROM person;';
+
+        connection.query($max_id, function(err, result, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            } else {
+                var maxID = result[0].maxid;
+            }
+
+        if(maxID == null) {
+            $update_id = 'ALTER TABLE person AUTO_INCREMENT = 1;';
+            connection.query($update_id, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+            console.log("Query succesfully executed");
+            });
+
+        } else {
+            $update_id = 'ALTER TABLE person AUTO_INCREMENT =' + maxID + ';';
+            connection.query($update_id, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+            console.log("Query succesfully executed");
+            });
+        }
+        });
+    
+        displayNotification(name + ' Removed', 'Reload to view changes');
+        
+        /*
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        }); */
+
+    }
+
+
+    function deleteMachine(type, number){
+
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+        });
+
+        $delete_query = 'DELETE FROM machine WHERE Machinetype="' + type + '" AND MachineNumber="' + number + '";';
+
+        connection.query($delete_query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            console.log("Query succesfully executed");
+        });
+
+        $max_id = 'SELECT MAX(Machineid) AS maxid FROM machine;';
+
+        connection.query($max_id, function(err, result, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            } else {
+                var maxID = result[0].maxid;
+            }
+
+        if(maxID == null) {
+            $update_id = 'ALTER TABLE machine AUTO_INCREMENT = 1;';
+            connection.query($update_id, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+            console.log("Query succesfully executed");
+            });
+
+        } else {
+            $update_id = 'ALTER TABLE machine AUTO_INCREMENT =' + maxID + ';';
+            connection.query($update_id, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+            console.log("Query succesfully executed");
+            });
+        }
+        });
+
+        /*
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        }); */
+
+        displayNotification('Machine Removed', 'Reload to view changes');
+
+    }
+
+
+
+    function deleteAssign(name, type, number){
+
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+        });
+
+        $delete_query = 'DELETE FROM assign WHERE Person="' + name + '" AND Machinetype="' + type + '" AND MachineNumber="' + number + '";';
+
+        $insert_query = 'INSERT INTO machine (Machinetype, Machinenumber) VALUES ("' + type + '", "' + number + '");';
+
+        connection.query($delete_query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            console.log("Query succesfully executed");
+        });
+
+        connection.query($insert_query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            console.log("Query succesfully executed");
+        });
+
+        $max_id = 'SELECT MAX(rowid) AS maxid FROM assign;';
+
+        connection.query($max_id, function(err, result, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            } else {
+                var maxID = result[0].maxid;
+            }
+
+        if(maxID == null) {
+            $update_id = 'ALTER TABLE assign AUTO_INCREMENT = 1;';
+            connection.query($update_id, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+            console.log("Query succesfully executed");
+            });
+
+        } else {
+            $update_id = 'ALTER TABLE assign AUTO_INCREMENT =' + maxID + ';';
+            connection.query($update_id, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+            console.log("Query succesfully executed");
+            });
+        }
+        });
+
+        /*
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        }); */
+
+        displayNotification('Machine Revoked from Person', 'Reload to view changes');
+
+    }
+
+
+    function searchAssign() {
+        // Declare variables
+          var input, filter, table, tr, td, i, txtValue;
+          input = document.getElementById("searchAssign");
+          filter = input.value.toUpperCase();
+          table = document.getElementById("table-assign");
+          tr = table.getElementsByTagName("tr");
+
+          // Loop through all table rows, and hide those who don't match the search query
+          for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+              } else {
+                tr[i].style.display = "none";
+              }
+            }
+          }
+        }
+    function searchMachine() {
+        // Declare variables
+          var input, filter, table, tr, td, i, txtValue;
+          input = document.getElementById("searchMachine");
+          filter = input.value.toUpperCase();
+          table = document.getElementById("table-machine");
+          tr = table.getElementsByTagName("tr");
+
+          // Loop through all table rows, and hide those who don't match the search query
+          for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+              } else {
+                tr[i].style.display = "none";
+              }
+            }
+          }
+        }
+    function searchPerson() {
+        // Declare variables
+          var input, filter, table, tr, td, i, txtValue;
+          input = document.getElementById("searchPerson");
+          filter = input.value.toUpperCase();
+          table = document.getElementById("table-person");
+          tr = table.getElementsByTagName("tr");
+
+          // Loop through all table rows, and hide those who don't match the search query
+          for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+              } else {
+                tr[i].style.display = "none";
+              }
+            }
+          }
+        }
+
+    // Export Table to Excel
+    function exportTableToExcel(tableID, filename = ''){
+    var downloadLink;
+    var dataType = 'application/vnd.ms-excel';
+    var tableSelect = document.getElementById(tableID);
+    var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+    
+    // Specify file name
+    filename = filename?filename+'.xls':'excel_data.xls';
+    
+    // Create download link element
+    downloadLink = document.createElement("a");
+    
+    document.body.appendChild(downloadLink);
+    
+    if(navigator.msSaveOrOpenBlob){
+        var blob = new Blob(['\ufeff', tableHTML], {
+            type: dataType
+        });
+        navigator.msSaveOrOpenBlob( blob, filename);
+    }else{
+        // Create a link to the file
+        downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+    
+        // Setting the file name
+        downloadLink.download = filename;
+        
+        //triggering the function
+        downloadLink.click();
+    }
+}
+
+    
+    function displayNotification(titleValue, notificationValue) {
+        const notification = {
+            title: titleValue,
+            body: notificationValue
+        }
+
+        const myNotification = new window.Notification(notification.title, notification)
+    }
+</script>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>ADD MACHINE</title>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <br>
+    <a class="waves-effect waves-light btn-small" onclick="window.location.href='admin.html'" style="left: 10px;"><i class="material-icons left">arrow_back</i>Go Back</a>
+
+    <div>
+	   <h2>Add new Machine</h2>
+    </div>
+
+	<div class="add_machine" style="padding: 50px">
+		<div style="width: 500px" id="machine-form">
+			<label for="Machine Type">Enter Machine Type</label>
+				<input id="type" type="text" name="Machinetype" placeholder="DGPS" required/>
+			<br><br>
+			<label for="Machine Number">Enter Machine Number</label>
+				<input id="number" type="text" name="Machine Number" placeholder="DGPS/WR/01">
+			<br><br>
+            <a class="waves-effect waves-light btn-small" id="register_btn" onclick="addMachine()"><i class="material-icons left">build</i>Add Machine</a>
+		</div>
+	</div>
+
+</body>
+<script>	
+    function addMachine() {
+        var type = document.getElementById('type').value;
+        var number = document.getElementById('number').value;
+        
+        if (number == '' || type == '') {
+            displayNotification('Error!', 'Values cannot be empty');
+            return
+        }
+
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+
+            else{
+                console.log("Connection successful");
+            }
+        });
+
+        // Perform a query
+
+        $query = 'INSERT INTO machine(Machinetype, MachineNumber) VALUES ("' + type + '", "' + number + '");';
+
+        connection.query($query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error occurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            console.log("Query successfully executed");
+        });
+
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        });
+
+        // display notification
+        displayNotification('Done!', 'New machine added successfully');
+    }
+
+    function displayNotification(titleValue, notificationValue) {
+        const notification = {
+            title: titleValue,
+            body: notificationValue
+        }
+
+        const myNotification = new window.Notification(notification.title, notification)
+    }
+  </script>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>ADD PERSON</title>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <br>
+    <a class="waves-effect waves-light btn-small" onclick="window.location.href='admin.html'" style="left: 10px;"><i class="material-icons left">arrow_back</i>Go Back</a>
+
+    <div>
+	   <h2> ADD NEW PERSON </h2>
+    </div>
+
+	<div class="add_person" style="padding: 50px;">
+		<div style="width: 500px" id="person-form">
+			<label for="person-name">Enter Person's Name</label>
+				<input id="person-name" type="text" name="Person Name" placeholder="Anoop Chaturvedi" required/>
+			<br><br>
+            <a class="waves-effect waves-light btn-small" id="register_btn" onclick="addPerson()"><i class="material-icons left">person</i>Add Person</a>
+		</div>
+	</div>
+
+
+</body>
+<script>
+    function addPerson() {
+        var name = document.getElementById('person-name').value;
+        
+        if (name == '') {
+            displayNotification('Error!', 'Values cannot be empty');
+            return
+        }
+
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+
+            else{
+                console.log("Connection successful");
+            }
+        });
+
+        // Perform a query
+
+        $query = 'REPLACE INTO person(Name) VALUES ("' + name + '");';
+
+        connection.query($query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error occurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            console.log("Query successfully executed");
+        });
+
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        });
+
+        // display notification
+        displayNotification('Done!', 'New user registered successfully');
+    }
+
+    function displayNotification(titleValue, notificationValue) {
+        const notification = {
+            title: titleValue,
+            body: notificationValue
+        }
+
+        const myNotification = new window.Notification(notification.title, notification)
+    }
+</script>
+</html>

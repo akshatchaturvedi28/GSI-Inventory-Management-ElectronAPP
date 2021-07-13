@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>ASSIGN MACHINE</title>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	
+</head>
+<body>
+	<br>
+    <a class="waves-effect waves-light btn-small" onclick="window.location.href='admin.html'" style="left: 10px;"><i class="material-icons left">arrow_back</i>Go Back</a>
+
+    <div>
+		<h3>Assign Machine to Person</h3>
+    </div>
+
+<div style="padding: 20px">
+<div style="display: inline-block; width: 225px;">
+	<a class="waves-effect waves-light btn-small" id="select-person"><i class="material-icons left">person</i>Select Person</a>
+	<p id="select-person-p"></p>
+</div>
+
+<div style="display: inline-block; width: 225px;">
+	<a class="waves-effect waves-light btn-small" id="select-type"><i class="material-icons left">build</i>Machine Type</a>
+	<p id="select-type-p"></p>
+</div>
+
+<div style="display: inline-block; width: 225px;">
+  	<a class="waves-effect waves-light btn-small" id="select-number"><i class="material-icons left">assessment</i>Machine Number</a>
+	<p id="select-number-p"></p>
+
+</div>
+</div>
+<br><br>
+<div>
+	<div style="padding: 20px;">
+        <a class="waves-effect waves-light btn-small" id="action-btn-give" onclick="give()" value="Give Machine"><i class="material-icons left">check_box</i>Assign Machine</a>
+
+    </div>
+</div>
+
+</body>
+<script>
+
+	var mysql = require('mysql');
+
+	function el(selector) {
+        return document.getElementById(selector);
+    }
+
+    // Get Persons List
+
+    el('select-person').addEventListener('mouseover', function(){
+
+    	getPersons(function(rows){
+    		var html = '';
+    		html += '<select class="browser-default" id="select-person-select"><option value="" disabled selected>Choose your option</option>';
+
+    		rows.forEach(function (row) {
+
+    			html += '<option value="';
+    			html += row.Name;
+    			html += '">';
+    			html += row.Name;
+    			html += '</option>';
+
+    			console.log(row);
+    			
+    		});
+
+    		html += '</select>';
+    		document.querySelector('#select-person-p').innerHTML = html;
+    		
+    	})
+    }, false);
+
+     function getPersons(callback) {
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+        });
+
+        // Perform a query
+        $query = 'SELECT Name FROM person ORDER BY Name ASC';
+
+        connection.query($query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            callback(rows);
+
+            console.log("Query succesfully executed");
+        });
+
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        });
+    }
+
+
+    // Get Machine Types
+
+    el('select-type').addEventListener('mouseover', function(){
+
+    	getMachines(function(rows){
+    		var html = '';
+    		html += '<select class="browser-default" id="select-type-select"><option value="" disabled selected>Choose your option</option>';
+
+    		rows.forEach(function (row) {
+
+    	
+    			html += '<option value="';
+    			html += row.Machinetype;
+    			html += '">';
+    			html += row.Machinetype;
+    			html += '</option>';
+
+    			console.log(row);
+    			
+    		});
+
+    		html += '</select>';
+    		document.querySelector('#select-type-p').innerHTML = html;
+    		
+    	})
+    }, false);
+
+     function getMachines(callback) {
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+        });
+
+        // Perform a query
+        $query = 'SELECT DISTINCT Machinetype FROM machine ORDER BY Machinetype ASC';
+
+        connection.query($query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            callback(rows);
+
+            console.log("Query succesfully executed");
+        });
+
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        });
+
+    }
+
+
+
+    // Get Numbers List
+
+    el('select-number').addEventListener('mouseover', function(){
+
+    	getNumbers(function(rows){
+    		var html = '';
+    		html += '<select class="browser-default" id="select-number-select"><option value="" disabled selected>Choose your option</option>';
+
+    		rows.forEach(function (row) {
+    	
+    			html += '<option value="';
+    			html += row.MachineNumber;
+    			html += '">';
+    			html += row.MachineNumber;
+    			html += '</option>';
+
+    			console.log(row);
+    			
+    		});
+
+    		html += '</select>';
+    		document.querySelector('#select-number-p').innerHTML = html;
+    		
+    	})
+    }, false);
+
+     function getNumbers(callback) {
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+        });
+
+        // Perform a query
+
+        var type = document.getElementById('select-type-select').value;
+
+        $query = 'SELECT MachineNumber FROM machine WHERE Machinetype = "'+ type + '"ORDER BY MachineNumber ASC';
+
+        connection.query($query, function (err, rows, fields) {
+            if (err) {
+                console.log("An error ocurred performing the query.");
+                console.log(err);
+                return;
+            }
+
+            callback(rows);
+
+            console.log("Query succesfully executed");
+        });
+
+        // Close the connection
+        connection.end(function () {
+            // The connection has been closed
+        });
+    }
+
+
+    // Give Machine
+
+    function give(){
+
+    	var name = document.getElementById('select-person-select').value;
+    	var type = document.getElementById('select-type-select').value;
+    	var number = document.getElementById('select-number-select').value;
+
+    	if (name == '' || type == '' || number == '') {
+            displayNotification('Error!', 'Values cannot be empty');
+            return
+        }
+
+        var mysql = require('mysql');
+        var config = require("./db-config");
+
+        // Add the credentials to access your database
+        var connection = mysql.createConnection(config.db);
+
+        // connect to mysql
+        connection.connect(function (err) {
+            // in case of error
+            if (err) {
+                console.log(err.code);
+                console.log(err.fatal);
+            }
+
+            else{
+                console.log("Connection successful");
+            }
+        });
+
+        $search_query = 'SELECT Machinetype, MachineNumber FROM machine WHERE Machinetype="' + type + '" AND MachineNumber="' + number + '";';
+
+    	$delete_query = 'DELETE FROM machine WHERE Machinetype="' + type + '" AND MachineNumber="' + number + '";';
+
+    	$insert_query = 'INSERT INTO assign (Person, Machinetype, Machinenumber) values ("' + name + '", "' + type + '", "' + number + '");';
+
+    	
+    	connection.query($search_query, function (err, rows, fields) {
+    		if (err) {
+    			console.log("An error occurred performing the query.");
+                console.log(err);
+                return;
+    		} else if (rows.length > 0) {
+    			console.log("Machine type and Number pair is available");
+
+    			connection.query($insert_query, function (err, rows, fields) {
+           		if (err) {
+	                console.log("An error occurred performing the query.");
+	                console.log(err);
+	                return;
+           		}
+
+            	console.log("Query successfully executed");
+        		});
+
+    			connection.query($delete_query, function (err, rows, fields) {
+	            if (err) {
+	                console.log("An error occurred performing the query.");
+	                console.log(err);
+	                return;
+	            }
+
+	            console.log("Query successfully executed");
+	        	});
+
+	        	// display notification
+        		displayNotification('Done!', 'Machine added');
+
+    		} else {
+    			console.log("Machine type and Number pair is not available");
+    			displayNotification('Machine not available');
+    		}
+    	});
+
+    	/*
+        // Close the connection
+        connection.end(function() {
+            // The connection has been closed
+        }); */
+    }
+
+    function displayNotification(titleValue, notificationValue) {
+        const notification = {
+            title: titleValue,
+            body: notificationValue
+        }
+
+        const myNotification = new window.Notification(notification.title, notification)
+    }
+
+</script>
+</html>
