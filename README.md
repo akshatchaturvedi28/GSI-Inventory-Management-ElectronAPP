@@ -25,3 +25,8 @@ For instance in assign.html we assign machines to the individuals.
 - Similarly *getMachines()* & *getNumbers()* displays machines and machines-numbers in table.
 - The *give()* function gets the value of selected person, machine and machine-number runs DELETE QUERY & INSERT QUERY in respective tables.
 - In the end the *displayNotification()* function shows a notification on our desktop screen.
+
+Tables in Database
+![image](https://user-images.githubusercontent.com/41522782/125480146-4085f7f4-fb4d-4cf5-a211-2029b0efc701.png)
+
+In the end we can use Electron Release Builds to make .exe file for application and run it with double-click.
